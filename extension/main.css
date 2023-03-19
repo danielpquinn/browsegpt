@@ -1,0 +1,129 @@
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  color: #083592;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 100%;
+}
+
+.mb-s {
+  margin-bottom: 10px;
+}
+
+.mb-m {
+  margin-bottom: 20px;
+}
+
+.mr-s {
+  margin-right: 10px;
+}
+
+.row {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.col {
+  flex: 1;
+}
+
+.text-right {
+  text-align: right;
+}
+
+a {
+  color: #083592;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #072A72;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+#header {
+  padding: 2px 10px;
+  background-color: #e8eaf0;
+  border-bottom: 2px solid #b2bedf;
+}
+
+.main {
+  padding: 20px;
+}
+
+#objective-form {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+#objective-form label {
+  display: inline-block;
+  width: 100%;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+#objective-form textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  border-color: #B2BEDF;
+  border-radius: 4px;
+}
+
+button {
+  border: none;
+  background-color: #083592;
+  border-radius: 10px;
+  color: #EAEEF6;
+  padding: 8px 16px;
+  font-weight: bold;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:not(:disabled):hover {
+  background-color: #072A72;
+}
+
+button:disabled {
+  opacity: 0.8;
+}
+
+#clear-history {
+  display: inline-block;
+  margin: 1rem 0;
+  font-size: 14px;
+}
+
+#loading {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 3px solid #b2bedf;
+  border-radius: 50%;
+  border-top-color: #083592;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+  to { -webkit-transform: rotate(360deg); }
+}

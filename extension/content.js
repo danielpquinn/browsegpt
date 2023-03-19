@@ -22,7 +22,7 @@
    * @type {object}
    * @property {string} reason
    * @property {string} step
-   * @property {Action[]} actions
+   * @property {Action} action
    */
 
   /** @type Map<string, SimpleNode> */
@@ -70,17 +70,12 @@
   /**
    * @param {HTMLElement} el Element to type into
    * @param {string} text Text to enter
-   * @param {boolean} submit Wether to submit form after entering text
    */
-  const enterText = async (el, text, submit) => {
+  const enterText = async (el, text) => {
     el.click();
     el.focus();
 
     await sendKeys(el, text);
-
-    if (!submit) {
-      return;
-    }
 
     let form = null;
     let currentEl = el;
@@ -400,20 +395,15 @@
     try {
       /** @type Command */
       const command = JSON.parse(commandJson);
-      const lastEnterText = command.actions
-        .filter((a) => a.action === "ENTER_TEXT")
-        .pop();
-      for (const actionObj of command.actions) {
-        const { action, id, value } = actionObj;
-        if (action === "CLICK") {
-          nodes.get(id).el.click();
-          used.add(nodes.get(id).el);
-        } else if (action === "ENTER_TEXT") {
-          await enterText(nodes.get(id).el, value, actionObj === lastEnterText);
-          used.add(nodes.get(id).el);
-        } else if (action === "NAVIGATE") {
-          window.location.assign(value);
-        }
+      const { action, id, value } = command.action;
+      if (action === "CLICK") {
+        nodes.get(id).el.click();
+        used.add(nodes.get(id).el);
+      } else if (action === "ENTER_TEXT") {
+        await enterText(nodes.get(id).el, value);
+        used.add(nodes.get(id).el);
+      } else if (action === "NAVIGATE") {
+        window.location.assign(value);
       }
     } catch (e) {
       console.error(e);

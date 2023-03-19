@@ -9,7 +9,7 @@ const getMessages = ({ previousSteps, url, html, objective }) => ([
   {
     role: "system",
     content:
-      "You are an automation system that accepts simplified HTML for the current page and an objective. Based on the provided objective, you will first generate short summary of the page you're on, along with any details that are relevant to your objective. Then you'll provide a suggested action to take on the HTML to achieve the objective. Simplified HTML is provided in the format `{id} {element} {text}`, for example `5 LINK Buy now`. Available actions that you can take are CLICK, NAVIGATE and ENTER_TEXT. Your goal is to accomplish the objective in the fewest number of actions possible. You can only issue actions for elements that are on the current page. You can only ENTER_TEXT into an INPUT.",
+      `You are an automation system that accepts simplified HTML for the current page and an objective. Based on the provided objective, you will first generate short summary of the page you're on, along with any details that are relevant to your objective. Then you'll provide a suggested action to take on the HTML to achieve the objective. Simplified HTML is provided in the format \`{id} {element} {text}\`, for example \`5 LINK Buy now\`. Available actions that you can take are CLICK, NAVIGATE and ENTER_TEXT. Your goal is to accomplish the objective in the fewest number of actions possible. The \`action\` in your response can only include \`id\`s for elements in the requests's \`html\` field. You can only ENTER_TEXT into an INPUT.`,
   },
   {
     role: "user",
@@ -29,7 +29,7 @@ const getMessages = ({ previousSteps, url, html, objective }) => ([
     content: `{
   "reason": "No previous steps. This is the CNN home page with top stories. This page is not related to my goal of booking an Airbnb. Based on the objective, the next step is to navigate to Airbnb.com",
   "step": "Navigate to airbnb.com",
-  "actions": [{ "action": "NAVIGATE", "value": "https://airbnb.com" }]
+  "action": { "action": "NAVIGATE", "value": "https://airbnb.com" }
 }`
   },
   {
@@ -48,7 +48,7 @@ const getMessages = ({ previousSteps, url, html, objective }) => ([
     content: `{
   "reason": "Navigated to Airbnb.com. This is the Airbnb home page and no destination has been entered. Based on the objective, The next step is to search for Seattle listings",
   "step": "Search for Seattle listings",
-  "actions": [{ "action": "ENTER_TEXT", "id": 1, "value": "Seattle" }]
+  "action": { "action": "ENTER_TEXT", "id": 1, "value": "Seattle" }
 }`
   },
   {
@@ -66,28 +66,7 @@ const getMessages = ({ previousSteps, url, html, objective }) => ([
     content: `{
   "reason": "Navigated to Airbnb.com and searched for Seattle listings. This is the Airbnb listings page. Based on the objective, the next step is to specify a date",
   "step": "Specify check in date",
-  "actions": [{ "action": "CLICK", "id": 0 }]
-}`
-  },
-  {
-    role: "user",
-    content: `{
-  "previousSteps": [],
-  "url": "https://example.com/signup",
-  "html": "0 FORM
-  1 INPUT label=First name, value=None
-  2 INPUT label=Last name, value=None
-  3 TEXTAREA label=Last name, value=None
-  4 BUTTON Submit",
-  "objective": "Fill form with example information"
-}`
-  },
-  {
-    role: "assistant",
-    content: `{
-  "reason": "No previous steps were taken. This is an example website with a name and message form. Based on the objective, the next step is to fill in each form field with example information and submit the form",
-  "step": "Fill form with name and message information",
-  "actions": [{ "action": "ENTER_TEXT", "id": 1, "value": "John" }, { "action": "ENTER_TEXT", "id": 2, "value": "Smith" }, { "action": "ENTER_TEXT", "id": 3,"value": "This is an example message" }]
+  "action": { "action": "CLICK", "id": 0 }
 }`
   },
   {
@@ -107,7 +86,7 @@ const getMessages = ({ previousSteps, url, html, objective }) => ([
     content: `{
   "reason": "No previous steps were taken. This is the Google search results page. Based on the objective, the next step is to reserve a table",
   "step": "Click on the reservation link",
-  "actions": [{ "action": "CLICK", "id": 3 }]
+  "action": { "action": "CLICK", "id": 3 }
 }`
   },
   {

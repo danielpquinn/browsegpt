@@ -19,7 +19,7 @@
  * @type {object}
  * @property {string} reason
  * @property {string} step
- * @property {Action[]} actions
+ * @property {Action} action
  */
 
 const form = document.getElementById("objective-form");
@@ -60,8 +60,8 @@ const getCurrentTab = async () => {
 const renderHistory = () => {
   historyEl.innerHTML = "";
   for (const command of commandHistory) {
-    const { actions, reason } = command;
-    const actionText = actions.map((a) => [a.action, a.el, a.value].join(" ")).join(", ");
+    const { action, reason } = command;
+    const actionText = `${action.action} ${action.el} ${action.value || ""}`;
     const itemEl = document.createElement("p");
     itemEl.innerHTML = `<small><strong>${actionText}:</strong> ${reason}</small>`;
     historyEl.prepend(itemEl);
@@ -177,9 +177,7 @@ form.addEventListener("submit", async (e) => {
     /** @type Command */
     const command = JSON.parse(commandResponse.command);
 
-    for (const action of command.actions) {
-      action.el = getLineById(action.id, html).trim();
-    }
+    command.action.el = getLineById(command.action.id, html).trim();
 
     commandHistory.push(command);
     if (commandHistory.length > 5) {
