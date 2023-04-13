@@ -1,8 +1,5 @@
 import { createApp, h } from "/node_modules/vue/dist/vue.esm-browser.js";
 
-/** @type Command[] */
-const commandHistory = [];
-
 const getCurrentTab = async () => {
   try {
     let [tab] = await chrome.tabs.query({
@@ -26,9 +23,28 @@ const getLineById = (id, html) => {
 const App = {
   name: 'App',
   data() {
-    return {};
+    return {
+      commandHistory: [],
+    };
   },
   render() {
+    let commandHistoryMarkup;
+
+    if (this.commandHistory.length) {
+      commandHistoryMarkup = this.commandHistory.map((command) => {
+        const { action, reason } = command;
+        const actionText = `${action.action} ${action.el} ${action.value || ""}`;
+        return h('p', {}, [
+          h('small', {}, [
+            h('strong', {}, actionText),
+            h('span', {}, reason),
+          ])
+        ]);
+      });
+    } else {
+      commandHistoryMarkup = h('small', {}, 'No history. Enter an instruction above to get started.');
+    }
+
     return h('div', {}, [
       h('div', { id: 'header' }, [
         h('img', { alt: 'BrowseGPT', src: 'logo.png', width: '163' }),
@@ -64,7 +80,7 @@ const App = {
         
             // pre.innerText = html;
         
-            const previousSteps = commandHistory.map((c) => c.step);
+            const previousSteps = this.commandHistory.map((c) => c.step);
         
             const body = JSON.stringify({
               version: "2.0",
@@ -88,10 +104,11 @@ const App = {
         
             command.action.el = getLineById(command.action.id, html).trim();
         
-            commandHistory.push(command);
-            if (commandHistory.length > 5) {
-              commandHistory.shift();
+            this.commandHistory.push(command);
+            if (this.commandHistory.length > 5) {
+              this.commandHistory.shift();
             }
+
             // renderHistory();
         
             chrome.tabs.sendMessage(tabId, {
@@ -136,7 +153,7 @@ const App = {
             h('a', { href: '#', id: 'clear-history' }, 'Clear history'),
           ]),
         ]),
-        h('div', { id: 'history' }),
+        h('div', {}, commandHistoryMarkup),
         h('h3', {}, 'Current page HTML'),
         h('pre', { id: 'html' }),
       ]),
