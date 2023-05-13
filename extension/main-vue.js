@@ -150,7 +150,11 @@ const App = {
             h('h3', {}, 'History'),
           ]),
           h('div', { class: 'col text-right' }, [
-            h('a', { href: '#', id: 'clear-history' }, 'Clear history'),
+            // on click: history element(s) from user input are deleted
+            h('a', { href: '#', id: 'clear-history', onClick: async (e) => {
+                this.commandHistory = [];
+              },
+            }, 'Clear history'),
           ]),
         ]),
         h('div', {}, commandHistoryMarkup),
