@@ -165,7 +165,7 @@ form.addEventListener("submit", async (e) => {
       objective,
     });
 
-    const res = await fetch("http://localhost:3000/command", {
+    const res = await fetch("http://localhost:38888/command", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

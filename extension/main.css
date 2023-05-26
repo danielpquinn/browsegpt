@@ -106,24 +106,10 @@ button:disabled {
   font-size: 14px;
 }
 
-#loading {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border: 3px solid #b2bedf;
-  border-radius: 50%;
-  border-top-color: #083592;
-  animation: spin 1s ease-in-out infinite;
-  -webkit-animation: spin 1s ease-in-out infinite;
+#loading img {
+  animation: none;
 }
 
 .hidden {
   display: none !important;
-}
-
-@keyframes spin {
-  to { -webkit-transform: rotate(360deg); }
-}
-@-webkit-keyframes spin {
-  to { -webkit-transform: rotate(360deg); }
 }
