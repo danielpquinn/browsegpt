@@ -23,6 +23,31 @@ const getLineById = (id, html) => {
   return el || "";
 };
 
+// Render the current command history to the 'history' element
+const renderHistory = () => {
+  const historyEl = document.querySelector("#history");
+
+  if (commandHistory.length === 0) {
+    historyEl.innerHTML = "No command history";
+  } else {
+    historyEl.innerHTML = commandHistory
+      .map(
+        (command, index) =>
+          `<div>
+            <strong>Command ${index + 1}:</strong>
+            <pre>${JSON.stringify(command, null, 2)}</pre>
+          </div>`
+      )
+      .join("");
+  }
+};
+
+// Remove all command history and re-render the 'history' element
+const clearHistory = () => {
+  commandHistory.length = 0;
+  renderHistory();
+};
+
 const App = {
   name: 'App',
   data() {
@@ -36,22 +61,25 @@ const App = {
       h('div', { class: 'main' }, [
         h('form', { id: 'objective-form', onSubmit: async (e) => {
           e.preventDefault();
-          // submitButton.setAttribute("disabled", true);
+
+          // Show loading spinner and disable submit button
+          document.getElementById('loading').classList.remove('hidden');
+          document.getElementById('submit').disabled = true;
           
           const currentTab = await getCurrentTab();
         
           if (!currentTab) {
-            // errorEl.innerHTML =
-            //   "BrowseGPT extension could not access a tab. Try closing and re-launching the extension.";
+            errorEl.innerHTML =
+              "BrowseGPT extension could not access a tab. Try closing and re-launching the extension.";
+            // Hide loading spinner and enable submit button
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('submit').disabled = false;
             return;
           }
         
           const tabId = currentTab.id;
-          // errorEl.innerText = "";
-          // loadingEl.classList.remove("hidden");
           let commandResponse = {};
         
-          // const objective = objectiveInput.value;
           const objective = e.target.objective.value;
         
           try {
@@ -59,10 +87,11 @@ const App = {
             const browserContent = await chrome.tabs.sendMessage(tabId, {
               message: "get_browser_content",
             });
+
+            // Display the received browser content HTML
+            document.getElementById('html').innerHTML = browserContent.html;
         
             const { url, html } = browserContent;
-        
-            // pre.innerText = html;
         
             const previousSteps = commandHistory.map((c) => c.step);
         
@@ -74,7 +103,7 @@ const App = {
               objective,
             });
         
-            const res = await fetch("http://localhost:3000/command", {
+            const res = await fetch("http://localhost:38888/command", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -85,31 +114,27 @@ const App = {
             commandResponse = await res.json();
             /** @type Command */
             const command = JSON.parse(commandResponse.command);
-        
-            command.action.el = getLineById(command.action.id, html).trim();
-        
+
             commandHistory.push(command);
             if (commandHistory.length > 5) {
               commandHistory.shift();
             }
-            // renderHistory();
-        
+            renderHistory();
+
             chrome.tabs.sendMessage(tabId, {
               message: "run_command",
               command: commandResponse.command,
             });
           } catch (e) {
             if (e.message.includes("Could not establish connection")) {
-              // errorEl.innerText =
-              //   "This page doesn't allow the BrowseGPT extension. Close the extension, go to a different URL like https://google.com, and then re-launch the extension from there.";
+              console.error("Could not establish connection");
             } else {
-              // errorEl.innerText = `Command: ${JSON.stringify(
-              //   commandResponse || ""
-              // )}\n Error: ${e.message}. Try closing and re-launching the extension.`;
+              console.error(e);
             }
           } finally {
-            // loadingEl.classList.add("hidden");
-            // submitButton.removeAttribute("disabled");
+            // Hide loading spinner and enable submit button
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('submit').disabled = false;
           }
         }}, [
           h('label', { for: 'objective' }, 'Instruction'),
@@ -117,7 +142,9 @@ const App = {
           h('textarea', { id: 'objective' }),
           h('div', { class: 'row align-items-center' }, [
             h('button', { type: 'submit', id: 'submit', class: 'mr-s' }, 'Submit'),
-            h('span', { id: 'loading', class: 'hidden' }),
+            h('span', { id: 'loading', class: 'hidden' }, [
+              h('img', { alt: 'Loading', src: 'loading.gif', width: '30' })
+            ]),
           ]),
         ]),
         h('button', { id: 'debug-get-browser-content', class: 'hidden' }, 'Get browser content'),
@@ -133,7 +160,10 @@ const App = {
             h('h3', {}, 'History'),
           ]),
           h('div', { class: 'col text-right' }, [
-            h('a', { href: '#', id: 'clear-history' }, 'Clear history'),
+            h('a', { href: '#', id: 'clear-history', onClick: (e) => {
+              e.preventDefault();
+              clearHistory();
+            }}, 'Clear history'),
           ]),
         ]),
         h('div', { id: 'history' }),
