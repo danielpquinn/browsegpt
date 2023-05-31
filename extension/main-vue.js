@@ -55,6 +55,9 @@ const App = {
           // submitButton.setAttribute("disabled", true);
           
           const currentTab = await getCurrentTab();
+
+          document.getElementById('loading').classList.remove('hidden');
+          document.getElementById('submit').disabled = false;
         
           if (!currentTab) {
             // errorEl.innerHTML =
@@ -69,7 +72,7 @@ const App = {
         
           // const objective = objectiveInput.value;
           const objective = e.target.objective.value;
-        
+
           try {
             /** @type BrowserContent */
             const browserContent = await chrome.tabs.sendMessage(tabId, {
@@ -125,16 +128,20 @@ const App = {
               // )}\n Error: ${e.message}. Try closing and re-launching the extension.`;
             }
           } finally {
-            // loadingEl.classList.add("hidden");
-            // submitButton.removeAttribute("disabled");
+              document.getElementById('loading').classList.add('hidden');
+              document.getElementById('submit').disabled = false;
           }
         }}, [
           h('label', { for: 'objective' }, 'Instruction'),
           h('br'),
           h('textarea', { id: 'objective' }),
           h('div', { class: 'row align-items-center' }, [
-            h('button', { type: 'submit', id: 'submit', class: 'mr-s' }, 'Submit'),
-            h('span', { id: 'loading', class: 'hidden' }),
+            h('div', { class: 'row align-items-center' }, [
+              h('button', { type: 'submit', id: 'submit', class: 'mr-s', onClick: async (e) => {
+                }, 
+              }, 'Submit'),
+              h('span', { id: 'loading', class: 'hidden' }),
+            ]),
           ]),
         ]),
         h('button', { id: 'debug-get-browser-content', class: 'hidden' }, 'Get browser content'),
@@ -150,8 +157,8 @@ const App = {
             h('h3', {}, 'History'),
           ]),
           h('div', { class: 'col text-right' }, [
-            // on click: history element(s) from user input are deleted
             h('a', { href: '#', id: 'clear-history', onClick: async (e) => {
+                e.preventDefault();
                 this.commandHistory = [];
               },
             }, 'Clear history'),
