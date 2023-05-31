@@ -1,8 +1,5 @@
 import { createApp, h } from "/node_modules/vue/dist/vue.esm-browser.js";
 
-/** @type Command[] */
-const commandHistory = [];
-
 const getCurrentTab = async () => {
   try {
     let [tab] = await chrome.tabs.query({
@@ -26,9 +23,28 @@ const getLineById = (id, html) => {
 const App = {
   name: 'App',
   data() {
-    return {};
+    return {
+      commandHistory: [],
+    };
   },
   render() {
+    let commandHistoryMarkup;
+
+    if (this.commandHistory.length) {
+      commandHistoryMarkup = this.commandHistory.map((command) => {
+        const { action, reason } = command;
+        const actionText = `${action.action} ${action.el} ${action.value || ""}`;
+        return h('p', {}, [
+          h('small', {}, [
+            h('strong', {}, actionText),
+            h('span', {}, reason),
+          ])
+        ]);
+      });
+    } else {
+      commandHistoryMarkup = h('small', {}, 'No history. Enter an instruction above to get started.');
+    }
+
     return h('div', {}, [
       h('div', { id: 'header' }, [
         h('img', { alt: 'BrowseGPT', src: 'logo.png', width: '163' }),
@@ -39,6 +55,9 @@ const App = {
           // submitButton.setAttribute("disabled", true);
           
           const currentTab = await getCurrentTab();
+
+          document.getElementById('loading').classList.remove('hidden');
+          document.getElementById('submit').disabled = false;
         
           if (!currentTab) {
             // errorEl.innerHTML =
@@ -53,7 +72,7 @@ const App = {
         
           // const objective = objectiveInput.value;
           const objective = e.target.objective.value;
-        
+
           try {
             /** @type BrowserContent */
             const browserContent = await chrome.tabs.sendMessage(tabId, {
@@ -64,7 +83,7 @@ const App = {
         
             // pre.innerText = html;
         
-            const previousSteps = commandHistory.map((c) => c.step);
+            const previousSteps = this.commandHistory.map((c) => c.step);
         
             const body = JSON.stringify({
               version: "2.0",
@@ -88,10 +107,11 @@ const App = {
         
             command.action.el = getLineById(command.action.id, html).trim();
         
-            commandHistory.push(command);
-            if (commandHistory.length > 5) {
-              commandHistory.shift();
+            this.commandHistory.push(command);
+            if (this.commandHistory.length > 5) {
+              this.commandHistory.shift();
             }
+
             // renderHistory();
         
             chrome.tabs.sendMessage(tabId, {
@@ -108,16 +128,20 @@ const App = {
               // )}\n Error: ${e.message}. Try closing and re-launching the extension.`;
             }
           } finally {
-            // loadingEl.classList.add("hidden");
-            // submitButton.removeAttribute("disabled");
+              document.getElementById('loading').classList.add('hidden');
+              document.getElementById('submit').disabled = false;
           }
         }}, [
           h('label', { for: 'objective' }, 'Instruction'),
           h('br'),
           h('textarea', { id: 'objective' }),
           h('div', { class: 'row align-items-center' }, [
-            h('button', { type: 'submit', id: 'submit', class: 'mr-s' }, 'Submit'),
-            h('span', { id: 'loading', class: 'hidden' }),
+            h('div', { class: 'row align-items-center' }, [
+              h('button', { type: 'submit', id: 'submit', class: 'mr-s', onClick: async (e) => {
+                }, 
+              }, 'Submit'),
+              h('span', { id: 'loading', class: 'hidden' }),
+            ]),
           ]),
         ]),
         h('button', { id: 'debug-get-browser-content', class: 'hidden' }, 'Get browser content'),
@@ -133,10 +157,14 @@ const App = {
             h('h3', {}, 'History'),
           ]),
           h('div', { class: 'col text-right' }, [
-            h('a', { href: '#', id: 'clear-history' }, 'Clear history'),
+            h('a', { href: '#', id: 'clear-history', onClick: async (e) => {
+                e.preventDefault();
+                this.commandHistory = [];
+              },
+            }, 'Clear history'),
           ]),
         ]),
-        h('div', { id: 'history' }),
+        h('div', {}, commandHistoryMarkup),
         h('h3', {}, 'Current page HTML'),
         h('pre', { id: 'html' }),
       ]),
