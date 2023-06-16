@@ -25,6 +25,7 @@ const App = {
   data() {
     return {
       commandHistory: [],
+      loading: false,
     };
   },
   render() {
@@ -56,7 +57,7 @@ const App = {
           
           const currentTab = await getCurrentTab();
 
-          document.getElementById('loading').classList.remove('hidden');
+          this.loading = true;
           document.getElementById('submit').disabled = false;
         
           if (!currentTab) {
@@ -128,7 +129,7 @@ const App = {
               // )}\n Error: ${e.message}. Try closing and re-launching the extension.`;
             }
           } finally {
-              document.getElementById('loading').classList.add('hidden');
+              this.loading = false;
               document.getElementById('submit').disabled = false;
           }
         }}, [
@@ -140,7 +141,7 @@ const App = {
               h('button', { type: 'submit', id: 'submit', class: 'mr-s', onClick: async (e) => {
                 }, 
               }, 'Submit'),
-              h('span', { id: 'loading', class: 'hidden' }),
+              h('span', [this.loading ? h('span', {id:'loading'}) : null]),
             ]),
           ]),
         ]),
